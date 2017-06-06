@@ -25,7 +25,9 @@ router.get('/:name', function (req, res, next) {
 // })
 
 router.post('/', function (req, res, next) {
-    res.json(req.body)
+    let object = req.body.string
+    res.json({"string": object, "length":object.length})
+
 })
 
 // router.post('/', function (req, res, next) {

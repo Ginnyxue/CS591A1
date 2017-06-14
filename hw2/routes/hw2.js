@@ -18,14 +18,14 @@ db.once('open', function() {
 });
 
 const Schema = mongoose.Schema;
-const strSchema = new Schema({
+const Schema_string = new Schema({
     addStr: String,
-    lenStr: Number
+    lenAddStr: Number
 });
 
 // console.log("Now Here!");
 
-const result = mongoose.model('string', strSchema);
+const result = mongoose.model('string', Schema_string);
 
 //Below GET method is used to return all current stored data to the page, while there is no parameter passed.
 router.get('/', function(req, res, next) {result.find({}, function (err, results) {
@@ -41,28 +41,29 @@ router.get('/', function(req, res, next) {result.find({}, function (err, results
 // compute the length, store the string and its length in the database, and
 // return both to the client.
 
-router.get('/:_str', function (req, res, next) {
-    result.find({addStr: req.params._str}, function (err, results) {
+router.get('/:str_param', function (req, res, next) {
+    result.find({addStr: req.params.str_param}, function (err, results) {
 
         if(Object.keys(results).length === 0){
-
-            let str = req.params._str;
+            console.log('Did not find this string in database.');
+            let str = req.params.str_param;
             let len = str.length;
             const newStr = new result({
                 addStr: str,
-                lenStr: len
+                lenAddStr: len
             });
 
             newStr.save(function(err) {
                 if (err) {res.send(err)}
                 else {
+                    console.log('This string has been saved into database.')
                     res.json({string: str, length: len});
                 }
             })
         }
         else{
             console.log("This string has been found!");
-            res.json({string:results[0].addStr, length:results[0].lenStr});
+            res.json({string:results[0].addStr, length:results[0].lenAddStr});
         }
     })
 });
@@ -77,11 +78,12 @@ router.post('/', function(req, res, next) {
         result.find({addStr: req.body.addStr}, function (err, results) {
 
             if(Object.keys(results).length === 0){
+
                 let str = req.body.addStr;
                 let len = str.length;
                 const newStr = new result({
                     addStr: str,
-                    lenStr: len
+                    lenAddStr: len
                 });
 
                 newStr.save(function(err) {
@@ -92,7 +94,7 @@ router.post('/', function(req, res, next) {
                 })
             }
             else{
-                res.json({string: results[0].addStr, length: results[0].lenStr});
+                res.json({string: results[0].addStr, length: results[0].lenAddStr});
             }
         })
 
@@ -103,16 +105,19 @@ router.post('/', function(req, res, next) {
     }
 });
 
-router.delete('/:_str', function (req, res, next) {
-    result.findOneAndRemove(req.params._str, function (err, results) {
-        if (err) {
-            res.json({message:'Error Deleting'});
-        }
-        else{
-            // console.log('I get here!');
-            res.json({message:'Successfully Deleted'});
+router.delete('/:str_param', function (req, res, next) {
+    result.findOneAndRemove({addStr: req.params.str_param}, function (err, data, results) {
+            if(data === null){
+                console.log("Get to null data passed in.")
+                res.json({message:'String not found.'});
+            }
+            else{
+                // console.log('I get here!');
+                res.json({message:'Successfully Deleted'});
+                console.log('This string is deleted from database.')
+            }
 
-        }
+
         
     })
 
